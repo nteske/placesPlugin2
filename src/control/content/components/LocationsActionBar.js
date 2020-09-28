@@ -121,14 +121,16 @@ class LocationsActionBar extends React.Component {
   handleDataExport() {
     const rows = [];  
     this.props.places.forEach(place => {
-      place.address.name = place.address.name.replace('#', '')
+      place.address.name = place.address.name.replace(/#|#/g, '')
       let categories = [];
       if (this.props.categories && Array.isArray(this.props.categories)) {
-        this.props.categories.forEach(category => place.categories.forEach(cat => {
+        this.props.categories.forEach(category => { 
+        if(!place.categories)place.categories=[];
+        place.categories.forEach(cat => {
            if (category.id === cat) {
              categories.push(category);
            }
-        }));
+        })});
       }
      let categoryNames = [];
       categories.forEach(cat => categoryNames.push(cat.name));
@@ -147,13 +149,13 @@ class LocationsActionBar extends React.Component {
         image: place.image || ''
       });
     });
-
+    
     let csvContent = 'data:text/csv;charset=utf-8,';
     let encoded = new CSVjs(rows, {header: true }).encode();
     csvContent += encoded;
 
 
-    const encodedURI = encodeURI(csvContent);
+    const encodedURI = encodeURI(csvContent).replace(/#/g, '%23');
     const link = document.createElement('a');
     link.setAttribute('href', encodedURI);
     link.setAttribute('download', 'places_export.csv');
